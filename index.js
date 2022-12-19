@@ -9,7 +9,7 @@ const app = express();
 
 const corsOptions ={
     origin:'*', 
-    credentials:true,            //access-control-allow-credentials:true
+    credentials:true,            
     optionSuccessStatus:200
 }
 app.use(cors(corsOptions));
@@ -156,7 +156,7 @@ app.post("/auth/login", async (req, res) => {
         }
 
         client.query("SELECT * FROM users WHERE email = $1", [email], (err, result)=>{
-            if (err) {
+            if (err || result.rowCount === 0) {
                 console.log("usuario nao encontrado");
                 return res.status(401).json({ msg: "email ou senha nao encontrado" });
             }
@@ -170,10 +170,6 @@ app.post("/auth/login", async (req, res) => {
         console.log(erro);
     }
 });
-
-
-
-
 
 
 app.listen(config.port, () =>
