@@ -102,19 +102,17 @@ app.delete("/users/:id", (req, res) => {
 
 app.post("/users", (req, res) => {
     try {
-        console.log("Chamou post", req.body);
-        const { nome, email } = req.body;
+        const { email, password } = req.body;
         client.query(
-            "INSERT INTO users (nome, email) VALUES ($1, $2) RETURNING * ",
-            [nome, email],
+            "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING * ",
+            [email, password],
             function (err, result) {
                 if (err) {
                     return console.error("Erro ao executar a qry de INSERT", err);
                 }
                 const { id } = result.rows[0];
                 res.setHeader("id", `${id}`);
-                res.status(201).json(result.rows[0]);
-                console.log(result);
+                return res.status(201).json(result.rows[0]);
             }
         );
     } catch (erro) {
