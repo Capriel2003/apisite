@@ -8,7 +8,12 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "");
+    res.header("Access-Control-Allow-Methods", 'GET,PUT,POST,DELETE');
+    app.use(cors());
+    next();
+});
 app.use(bodyparser.json());
 
 
@@ -32,6 +37,15 @@ app.get("/", (req, res) => {
     res.send("Ok - Servidor disponível.");
 });
 
+
+app.get("/auth", (req, res) => {
+    try {
+        client.query("SELECT * FROM users Where email = $1 and password = $2", [req.params.email, req.params.password])
+    }
+    catch {
+
+    }
+});
 
 
 app.get("/users", (req, res) => {
@@ -144,21 +158,19 @@ app.put("/users/:id", (req, res) => {
 
 app.post("/auth/login", async (req, res) => {
     try {
-        const id = req.params.id;
         const { email, password } = req.body;
         if (!(email && password)) {
             return res.status(401).json({ msg: "email ou senha vazios" });
         }
 
         let cliente = await client.query("SELECT * FROM users WHERE email = $1", [email])
-    
-        if(!cliente){
+
+        if (!cliente) {
             console.log("usuario nao encontrado");
             return res.status(401).json({ msg: "email ou senha nao encontrado" });
         }
-        if(cliente.rows[0].password === password){
+        if (cliente.rows[0].password === password) {
             console.log("caixa");
-
             return res.status(200).json({ msg: "sucesso" });
         }
 
