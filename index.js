@@ -40,16 +40,6 @@ app.get("/", (req, res) => {
 });
 
 
-app.get("/auth", (req, res) => {
-    try {
-        client.query("SELECT * FROM users Where email = $1 and password = $2", [req.params.email, req.params.password])
-    }
-    catch {
-
-    }
-});
-
-
 app.get("/users", (req, res) => {
     try {
         client.query("SELECT * FROM users", function
@@ -165,16 +155,16 @@ app.post("/auth/login", async (req, res) => {
             return res.status(401).json({ msg: "email ou senha vazios" });
         }
 
-        let cliente = await client.query("SELECT * FROM users WHERE email = $1", [email])
-
-        if (!cliente) {
-            console.log("usuario nao encontrado");
-            return res.status(401).json({ msg: "email ou senha nao encontrado" });
-        }
-        if (cliente.rows[0].password === password) {
-            console.log("caixa");
-            return res.status(200).json({ msg: "sucesso" });
-        }
+        client.query("SELECT * FROM users WHERE email = $1", [email], (err, result)=>{
+            if (err) {
+                console.log("usuario nao encontrado");
+                return res.status(401).json({ msg: "email ou senha nao encontrado" });
+            }
+            if (result.rows[0].password === password) {
+                console.log("caixa");
+                return res.status(200).json({ msg: "sucesso" });
+            }
+        })
 
     } catch (erro) {
         console.log(erro);
