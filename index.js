@@ -5,7 +5,8 @@ const bodyparser = require("body-parser");
 const config = require("./config");
 const jwt = require("jsonwebtoken");
 
-const cors = require('cors');
+const app = express();
+
 const corsOptions ={
     origin:'*', 
     credentials:true,            //access-control-allow-credentials:true
@@ -13,7 +14,7 @@ const corsOptions ={
 }
 app.use(cors(corsOptions));
 
-const app = express();
+
 app.use(express.json());
 app.use(bodyparser.json());
 
