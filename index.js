@@ -55,6 +55,84 @@ app.get("/users", (req, res) => {
     }
 });
 
+
+app.post("/auth/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!(email && password)) {
+            return res.status(401).json({ msg: "email ou senha vazios" });
+        }
+
+        client.query("SELECT * FROM users WHERE email = $1", [email], (err, result)=>{
+            if (err || result.rowCount === 0) {
+                console.log("usuario nao encontrado");
+                return res.status(401).json({ msg: "email ou senha nao encontrado" });
+            }
+            if (result.rows[0].password === password) {
+                console.log("caixa");
+                return res.status(200).json({ msg: "sucesso" });
+            }
+        })
+
+    } catch (erro) {
+        console.log(erro);
+    }
+});
+
+
+
+app.post("/users", (req, res) => {
+    try {
+        const { name, email, password, permisions } = req.body;
+        client.query(
+            "INSERT INTO users (name, email, password, permisions) VALUES ($1, $2, $3, $4) RETURNING * ",
+            [name, email, password, permisions],
+            function (err, result) {
+                if (err) {
+                    return console.error("Erro ao executar a qry de INSERT", err);
+                }
+                const { id } = result.rows[0];
+                res.setHeader("id", `${id}`);
+                return res.status(201).json(result.rows[0]);
+            }
+        );
+    } catch (erro) {
+        console.error(erro);
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+app.get("/users", (req, res) => {
+    try {
+        client.query("SELECT * FROM users", function
+            (err, result) {
+            if (err) {
+                return console.error("Erro ao executar a qry de SELECT", err);
+            }
+            res.send(result.rows);
+            console.log("Chamou get users");
+        });
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 app.get("/users/:id", (req, res) => {
     try {
         console.log("Chamou /:id " + req.params.id);
@@ -100,27 +178,6 @@ app.delete("/users/:id", (req, res) => {
 });
 
 
-app.post("/users", (req, res) => {
-    try {
-        const { email, password } = req.body;
-        client.query(
-            "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING * ",
-            [email, password],
-            function (err, result) {
-                if (err) {
-                    return console.error("Erro ao executar a qry de INSERT", err);
-                }
-                const { id } = result.rows[0];
-                res.setHeader("id", `${id}`);
-                return res.status(201).json(result.rows[0]);
-            }
-        );
-    } catch (erro) {
-        console.error(erro);
-    }
-});
-
-
 app.put("/users/:id", (req, res) => {
     try {
         console.log("Chamou update", req.body);
@@ -141,31 +198,6 @@ app.put("/users/:id", (req, res) => {
         );
     } catch (erro) {
         console.error(erro);
-    }
-});
-
-
-
-app.post("/auth/login", async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        if (!(email && password)) {
-            return res.status(401).json({ msg: "email ou senha vazios" });
-        }
-
-        client.query("SELECT * FROM users WHERE email = $1", [email], (err, result)=>{
-            if (err || result.rowCount === 0) {
-                console.log("usuario nao encontrado");
-                return res.status(401).json({ msg: "email ou senha nao encontrado" });
-            }
-            if (result.rows[0].password === password) {
-                console.log("caixa");
-                return res.status(200).json({ msg: "sucesso" });
-            }
-        })
-
-    } catch (erro) {
-        console.log(erro);
     }
 });
 
